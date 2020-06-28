@@ -4,8 +4,13 @@
     outline: 1px solid rgb(175, 216, 248);
 }
 
+.node:hover {
+    background-color: slategray;
+    opacity: 50%;
+}
+
 .visited-node {
-    
+
 }
 
 .start-node {
