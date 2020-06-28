@@ -3,3 +3,19 @@
     height: 25px;
     outline: 1px solid rgb(175, 216, 248);
 }
+
+.visited-node {
+    
+}
+
+.start-node {
+    background-color: rgb(47, 201, 142);
+}
+
+.end-node {
+    background-color: rgb(241, 116, 58);
+}
+
+.wall-node {
+    background-color: rgb(97, 60, 197);
+}

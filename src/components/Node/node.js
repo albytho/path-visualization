@@ -8,10 +8,11 @@ export default class node extends Component {
     }
 
     render() {
-        const {row, col, isStart, isEnd, visited, extraClassName} = this.props;
+        const {row, col, isStart, isEnd, isWall, visited, handleClick} = this.props;
+        const extraClassName = isStart ? 'start-node' : isWall ? 'wall-node' : isEnd ? 'end-node' : '';
 
         return (
-            <div id={`node-${row}-${col}`} className={`node ${extraClassName}`}></div>
+            <div id={`node-${row}-${col}`} className={`node ${extraClassName}`} onClick={() => handleClick(row, col)}></div>
         )
     }
 }
