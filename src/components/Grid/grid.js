@@ -11,14 +11,27 @@ export default class grid extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            grid: []
+            grid: [],
+            isMouseClicked: false
         }
     }
 
-    handleClick = (row, col) => {
+    handleMouseDown = (row, col) => {
         const newGrid = this.state.grid.slice();
-        newGrid[row][col].isWall = true;
-        this.setState({grid: newGrid})
+        newGrid[row][col].isWall = !newGrid[row][col].isWall;
+        this.setState({grid: newGrid, isMouseClicked: !this.state.isMouseClicked})
+    }
+
+    handleMouseEnter = (row, col) => {
+        if(this.state.isMouseClicked) {
+            const newGrid = this.state.grid.slice();
+            newGrid[row][col].isWall = true;
+            this.setState({grid: newGrid}) 
+        }
+    }
+
+    handleMouseUp = () => {
+        this.setState({isMouseClicked: false});
     }
 
     componentDidMount() {
@@ -52,7 +65,19 @@ export default class grid extends Component {
                             {row.map((node, nodeIndex) => {
                                 const {isStart, isEnd, visited, isWall, row, col, extraClassName} = node;
                                 return(
-                                    <Node className='gridCol' key={nodeIndex} isStart={isStart} isEnd={isEnd} visited={visited} isWall={isWall} row={row} col={col} handleClick = {(row, col) => this.handleClick(row, col)}/>
+                                    <Node 
+                                    className='gridCol' 
+                                    key={nodeIndex} 
+                                    isStart={isStart} 
+                                    isEnd={isEnd} 
+                                    visited={visited} 
+                                    isWall={isWall} 
+                                    row={row} 
+                                    col={col} 
+                                    handleMouseDown = {(row, col) => this.handleMouseDown(row, col)}
+                                    handleMouseEnter = {(row, col) => this.handleMouseEnter(row, col)}
+                                    handleMouseUp = {() => this.handleMouseUp()}
+                                    />
                                 )
                             })}
                         </div>
