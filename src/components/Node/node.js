@@ -3,7 +3,7 @@ import './node.css';
 
 const node = ({row, col, isStart, isEnd, isWall, visited, handleMouseDown, handleMouseEnter, handleMouseUp}) => {
     
-    const extraClassName = isStart ? 'start-node' : isWall ? 'wall-node' : isEnd ? 'end-node' : '';
+    const extraClassName = isStart ? 'start-node' : isWall ? 'wall-node' : isEnd ? 'end-node' : visited ? 'visited-node' : '';
 
     return (
         <div 
@@ -17,7 +17,7 @@ const node = ({row, col, isStart, isEnd, isWall, visited, handleMouseDown, handl
 }
 
 const isEqual = (prevProps, nextProps) => {
-    if(prevProps.isWall !== nextProps.isWall){
+    if(prevProps.isWall !== nextProps.isWall || prevProps.visited !== nextProps.visited){
         return false;
     }
     return true;
