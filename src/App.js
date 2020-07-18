@@ -1,10 +1,10 @@
 import React from 'react';
-import Grid from './components/Grid/grid';
+import Dashboard from './components/Dashboard/dashboard';
 
 function App() {
   return (
     <div className="App">
-      <Grid/>
+      <Dashboard/>
     </div>
   );
 }

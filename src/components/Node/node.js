@@ -1,18 +1,26 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import './node.css';
 
-export default class node extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {}
-    }
+const node = ({row, col, isStart, isEnd, isWall, visited, handleMouseDown, handleMouseEnter, handleMouseUp}) => {
+    
+    const extraClassName = isStart ? 'start-node' : isWall ? 'wall-node' : isEnd ? 'end-node' : '';
 
-    render() {
-        const {row, col, isStart, isEnd, isWall, visited, handleMouseDown, handleMouseEnter, handleMouseUp} = this.props;
-        const extraClassName = isStart ? 'start-node' : isWall ? 'wall-node' : isEnd ? 'end-node' : '';
-
-        return (
-            <div id={`node-${row}-${col}`} className={`node ${extraClassName}`} onMouseDown={() => handleMouseDown(row, col)} onMouseEnter={() => handleMouseEnter(row, col)} onMouseUp={() => handleMouseUp()}></div>
-        )
-    }
+    return (
+        <div 
+            id={`node-${row}-${col}`} 
+            className={`node ${extraClassName}`} 
+            onMouseDown={() => handleMouseDown(row, col)} 
+            onMouseEnter={() => handleMouseEnter(row, col)} 
+            onMouseUp={() => handleMouseUp()}>
+        </div>
+    )
 }
+
+const isEqual = (prevProps, nextProps) => {
+    if(prevProps.isWall !== nextProps.isWall){
+        return false;
+    }
+    return true;
+}
+
+export default React.memo(node, isEqual);

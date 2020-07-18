@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import Node from '../Node/node';
 import './grid.css'
 
-const START_NODE_ROW = 10;
-const START_NODE_COL = 15;
-const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 35;
+const START_NODE_ROW = 0;
+const START_NODE_COL = 0;
+const FINISH_NODE_ROW = 15;
+const FINISH_NODE_COL = 18;
 
 export default class grid extends Component {
     constructor(props) {
@@ -38,7 +38,7 @@ export default class grid extends Component {
         const grid = []
         for(let rowIndex = 0; rowIndex<30; rowIndex++){
             const currRow = []
-            for(let colIndex = 0; colIndex<60; colIndex++){
+            for(let colIndex = 0; colIndex<30; colIndex++){
                 const currNode = {
                     isStart: rowIndex === START_NODE_ROW & colIndex === START_NODE_COL,
                     isEnd: rowIndex === FINISH_NODE_ROW & colIndex === FINISH_NODE_COL,
