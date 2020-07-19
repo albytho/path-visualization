@@ -10,7 +10,7 @@
 }
 
 .visited-node {
-    animation: visitAnimation 0.75s;
+    animation: visitAnimation 1.25s;
     background-color: rgb(64, 169, 230)
 }
 
@@ -27,6 +27,6 @@
 }
 
 @keyframes visitAnimation {
-    50% {background-color: rgb(19, 115, 170)}
+    50% {background-color: rgb(47, 201, 142)}
     100% {background-color: rgb(64, 169, 230)}
   }
