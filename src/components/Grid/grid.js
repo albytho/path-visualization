@@ -1,11 +1,11 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import Node from '../Node/node';
 import './grid.css'
 
-const START_NODE_ROW = 3;
-const START_NODE_COL = 5;
-const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 15;
+const START_NODE_ROW = 9;
+const START_NODE_COL = 10;
+const FINISH_NODE_ROW = 9;
+const FINISH_NODE_COL = 40;
 
 export default class grid extends Component {
     constructor(props) {
@@ -18,9 +18,9 @@ export default class grid extends Component {
 
     componentDidMount() {
         const grid = []
-        for(let rowIndex = 0; rowIndex<30; rowIndex++){
+        for(let rowIndex = 0; rowIndex<20; rowIndex++){
             const currRow = []
-            for(let colIndex = 0; colIndex<30; colIndex++){
+            for(let colIndex = 0; colIndex<50; colIndex++){
                 const currNode = {
                     isStart: rowIndex === START_NODE_ROW & colIndex === START_NODE_COL,
                     isEnd: rowIndex === FINISH_NODE_ROW & colIndex === FINISH_NODE_COL,
@@ -38,25 +38,15 @@ export default class grid extends Component {
         this.setState({grid: grid});
     }
 
-    animatePath(searchPath) {
-        for(const currNode of searchPath){
-            const currRow = currNode[0];
-            const currCol = currNode[1];
-            const newGrid = [...this.state.grid];
-            newGrid[currRow][currCol].visited = true;
-            this.setState({grid: newGrid});
-        }
-    }
-
-    isValid(grid, row, col) {
+    isValid(grid, row, col){
         return row >= 0 && col >= 0 && row < grid.length && col < grid[0].length && grid[row][col].isWall === false && grid[row][col].visited === false
     }
 
 
-    depthFirstSearch() {
+    breadthFirstSearch(){
         const queue = [];
         const searchPath = [];
-        let grid = [...this.state.grid];
+        const grid = this.state.grid;
 
         queue.push([START_NODE_ROW, START_NODE_COL])
         searchPath.push([START_NODE_ROW, START_NODE_COL])
@@ -81,20 +71,84 @@ export default class grid extends Component {
                     searchPath.push([newRow, newCol])
                     grid[newRow][newCol].visited = true;
                 }
-            })
+            });
         }
 
         return searchPath;
     }
 
-    handleAnimation = () => {
-        const searchPath = this.depthFirstSearch();
+    depthFirstSearch(){
+        let searchPath = this.depthFirstSearchHelper(this.state.grid, [START_NODE_ROW, START_NODE_COL], []);
+        console.log(searchPath);
+        
+        let lastIndex = 0
+        for(let i=0; i<searchPath.length; i++){
+            const currNode = searchPath[i];
+            const currRow = currNode[0];
+            const currCol = currNode[1];
+
+            if(currRow === FINISH_NODE_ROW && currCol === FINISH_NODE_COL){
+                lastIndex = i;
+                break;
+            }
+        }
+        return searchPath.slice(0, lastIndex+1);
+    }
+
+    depthFirstSearchHelper(grid, currNode, searchPath){
+        if(currNode[0] === FINISH_NODE_ROW && currNode[1] === FINISH_NODE_COL){
+            searchPath.push(currNode);
+        }
+        else{
+            const currRow = currNode[0];
+            const currCol = currNode[1];
+
+            grid[currRow][currCol].visited = true;
+            searchPath.push(currNode);
+
+            const directions = [[0,1],[1,0],[0,-1],[-1,0]];
+            directions.forEach((direction) => {
+                const newRow = currRow+direction[0];
+                const newCol = currCol+direction[1];
+
+                if(this.isValid(grid, newRow, newCol)) {
+                    this.depthFirstSearchHelper(grid, [newRow, newCol], searchPath);
+                }
+            });
+
+            return searchPath;
+        }
+    }
+
+    handleAnimation(){
+        const searchPath = this.breadthFirstSearch();
         this.animatePath(searchPath);
+    }
+
+    animatePath(searchPath){
+        for(let i=0; i<searchPath.length; i++){
+            const currRow = searchPath[i][0];
+            const currCol = searchPath[i][1];
+            setTimeout(() => {
+                if((currRow === START_NODE_ROW && currCol === START_NODE_COL) || (currRow === FINISH_NODE_ROW && currCol === FINISH_NODE_COL)){
+                    return;
+                }
+
+                document.getElementById(`node-${currRow}-${currCol}`).className = 'node visited-node';
+            }, i*5)
+        }
     }
 
     handleMouseDown = (row, col) => {
         const newGrid = [...this.state.grid];
         newGrid[row][col].isWall = !newGrid[row][col].isWall;
+
+        if(newGrid[row][col].isWall){
+            document.getElementById(`node-${row}-${col}`).className = 'node wall-node';
+        }
+        else{
+            document.getElementById(`node-${row}-${col}`).className = 'node';
+        }
         this.setState({grid: newGrid, isMouseClicked: !this.state.isMouseClicked})
     }
 
@@ -102,7 +156,8 @@ export default class grid extends Component {
         if(this.state.isMouseClicked) {
             const newGrid = this.state.grid.slice();
             newGrid[row][col].isWall = true;
-            this.setState({grid: newGrid}) 
+            this.setState({grid: newGrid});
+            document.getElementById(`node-${row}-${col}`).className = 'node wall-node'; 
         }
     }
 
@@ -113,7 +168,7 @@ export default class grid extends Component {
     render() {
         return (
             <>
-                <button type="button" className="btn btn-primary" onClick={this.handleAnimation}>Animate</button>
+                <button type="button" className="btn btn-success" onClick={this.handleAnimation.bind(this)}>Animate</button>
                 <div className='grid'>
                     {this.state.grid.map((row, rowIndex) => {
                         return(
