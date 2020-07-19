@@ -142,13 +142,7 @@ export default class grid extends Component {
     handleMouseDown = (row, col) => {
         const newGrid = [...this.state.grid];
         newGrid[row][col].isWall = !newGrid[row][col].isWall;
-
-        if(newGrid[row][col].isWall){
-            document.getElementById(`node-${row}-${col}`).className = 'node wall-node';
-        }
-        else{
-            document.getElementById(`node-${row}-${col}`).className = 'node';
-        }
+        document.getElementById(`node-${row}-${col}`).className = newGrid[row][col].isWall ? 'node wall-node' : document.getElementById(`node-${row}-${col}`).className
         this.setState({grid: newGrid, isMouseClicked: !this.state.isMouseClicked})
     }
 

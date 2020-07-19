@@ -10,8 +10,8 @@
 }
 
 .visited-node {
-    transition: 0.5s ease;
-    background-color: rgb(64, 169, 230);
+    animation: visitAnimation 0.75s;
+    background-color: rgb(64, 169, 230)
 }
 
 .start-node {
@@ -25,3 +25,8 @@
 .wall-node {
     background-color: rgb(97, 60, 197);
 }
+
+@keyframes visitAnimation {
+    50% {background-color: rgb(19, 115, 170)}
+    100% {background-color: rgb(64, 169, 230)}
+  }
