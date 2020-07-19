@@ -17,36 +17,25 @@ export default class grid extends Component {
     }
 
     componentDidMount() {
-        const grid = []
-        for(let rowIndex = 0; rowIndex<20; rowIndex++){
-            const currRow = []
-            for(let colIndex = 0; colIndex<50; colIndex++){
-                const currNode = {
-                    isStart: rowIndex === START_NODE_ROW & colIndex === START_NODE_COL,
-                    isEnd: rowIndex === FINISH_NODE_ROW & colIndex === FINISH_NODE_COL,
-                    visited: false,
-                    isWall: false,
-                    row: rowIndex,
-                    col: colIndex
-                }
-
-                currRow.push(currNode)
-            }
-            grid.push(currRow)
-        }
-
-        this.setState({grid: grid});
+        this.initiateEmptyGrid();
     }
 
     isValid(grid, row, col){
         return row >= 0 && col >= 0 && row < grid.length && col < grid[0].length && grid[row][col].isWall === false && grid[row][col].visited === false
     }
 
+    isStartOrEndLocation(row, col){
+        if((row === START_NODE_ROW && col === START_NODE_COL) || (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)){
+            return true;
+        }
+        return false;
+    }
+
 
     breadthFirstSearch(){
         const queue = [];
         const searchPath = [];
-        const grid = this.state.grid;
+        const grid = this.state.grid.slice();
 
         queue.push([START_NODE_ROW, START_NODE_COL])
         searchPath.push([START_NODE_ROW, START_NODE_COL])
@@ -139,6 +128,32 @@ export default class grid extends Component {
         }
     }
 
+    initiateEmptyGrid(){
+        const grid = []
+        for(let rowIndex = 0; rowIndex<20; rowIndex++){
+            const currRow = []
+            for(let colIndex = 0; colIndex<50; colIndex++){
+                const currNode = {
+                    isStart: rowIndex === START_NODE_ROW & colIndex === START_NODE_COL,
+                    isEnd: rowIndex === FINISH_NODE_ROW & colIndex === FINISH_NODE_COL,
+                    visited: false,
+                    isWall: false,
+                    row: rowIndex,
+                    col: colIndex
+                }
+
+                if(document.getElementById(`node-${rowIndex}-${colIndex}`) !== null && !this.isStartOrEndLocation(rowIndex, colIndex)){
+                    document.getElementById(`node-${rowIndex}-${colIndex}`).className = 'node';
+                }
+
+                currRow.push(currNode)
+            }
+            grid.push(currRow)
+        }
+
+        this.setState({grid: grid});
+    }
+
     handleMouseDown = (row, col) => {
         const newGrid = [...this.state.grid];
         newGrid[row][col].isWall = !newGrid[row][col].isWall;
@@ -163,6 +178,7 @@ export default class grid extends Component {
         return (
             <>
                 <button type="button" className="btn btn-success" onClick={this.handleAnimation.bind(this)}>Animate</button>
+                <button type="button" className="btn btn-secondary" onClick={this.initiateEmptyGrid.bind(this)}>Reset</button>
                 <div className='grid'>
                     {this.state.grid.map((row, rowIndex) => {
                         return(

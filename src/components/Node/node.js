@@ -1,8 +1,7 @@
 import React from 'react'
 import './node.css';
 
-const node = ({row, col, isStart, isEnd, isWall, visited, handleMouseDown, handleMouseEnter, handleMouseUp}) => {
-    
+const node = ({row, col, isStart, isEnd, isWall, visited, handleMouseDown, handleMouseEnter, handleMouseUp}) => {    
     const extraClassName = isStart ? 'start-node' : isWall ? 'wall-node' : isEnd ? 'end-node' : visited ? 'visited-node' : '';
 
     return (
