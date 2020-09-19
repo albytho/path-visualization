@@ -1,3 +1,31 @@
 button {
     margin-right:10px;
 }
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.gridRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.gridCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-toggle{
+    color: black !important;
+    background-color: white !important;
+    border-color: white !important;
+}
+
+.dropdown-toggle:hover{
+    background-color: rgb(226, 226, 226) !important;
+    border-color: rgb(226, 226, 226) !important;
+}
