@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import Grid from '../Grid/grid';
-import './dashboard.css';
+import Grid from '../Grid/Grid';
+import './Dashboard.css';
 
 
-export default class dashboard extends Component {
+export default class Dashboard extends Component {
     render() {
         return (
             <div className='dashboard'>
@@ -28,7 +28,7 @@ export default class dashboard extends Component {
                         </div>
                     </div>
                 </nav>
-                <Grid/>
+                <Grid />
             </div>
         )
     }
