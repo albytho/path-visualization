@@ -4,11 +4,6 @@ import Node from '../Node/node';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown'
 
-const START_NODE_ROW = 9;
-const START_NODE_COL = 10;
-const FINISH_NODE_ROW = 9;
-const FINISH_NODE_COL = 40;
-
 export default class Dashboard extends Component {
     constructor(props) {
         super(props);
@@ -17,7 +12,11 @@ export default class Dashboard extends Component {
             isMouseClicked: false,
             isSolved: false,
             selectedSearchAlgorithm: 'Select a Search Algorithm',
-            userAnimatesBeforeAlgorithmSelectionError: false
+            userAnimatesBeforeAlgorithmSelectionError: false,
+            startNodeRow: null,
+            startNodeCol: null,
+            endNodeRow: null,
+            endNodeCol: null
         }
     }
 
@@ -26,18 +25,11 @@ export default class Dashboard extends Component {
     }
 
     isValid(grid, row, col) {
-        return row >= 0 && col >= 0 && row < grid.length && col < grid[0].length && grid[row][col].isWall === false && grid[row][col].visited === false
-    }
-
-    isStartOrEndLocation(row, col) {
-        if ((row === START_NODE_ROW && col === START_NODE_COL) || (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)) {
-            return true;
-        }
-        return false;
+        return row >= 0 && col >= 0 && row < grid.length && col < grid[0].length && grid[row][col].isWall === false && grid[row][col].visited === false;
     }
 
     isStartOrEndNode(row, col) {
-        return (row === START_NODE_ROW && col === START_NODE_COL) || (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
+        return (row === this.state.startNodeRow && col === this.state.startNodeCol) || (row === this.state.endNodeRow && col === this.state.endNodeCol);
     }
 
 
@@ -45,10 +37,11 @@ export default class Dashboard extends Component {
         const queue = [];
         const searchPath = [];
         const grid = this.state.grid.slice();
+        const startNode = [this.state.startNodeRow, this.state.startNodeCol];
 
-        queue.push([START_NODE_ROW, START_NODE_COL])
-        searchPath.push([START_NODE_ROW, START_NODE_COL])
-        grid[START_NODE_ROW][START_NODE_COL].visited = true;
+        queue.push([startNode[0], startNode[1]])
+        searchPath.push([startNode[0], startNode[1]])
+        grid[startNode[0]][startNode[1]].visited = true;
 
         while (queue.length > 0) {
             const currNode = queue.shift();
@@ -76,8 +69,9 @@ export default class Dashboard extends Component {
     }
 
     depthFirstSearch() {
-        let searchPath = this.depthFirstSearchHelper(this.state.grid, [START_NODE_ROW, START_NODE_COL], []);
-        console.log(searchPath);
+        const startNode = [this.state.startNodeRow, this.state.startNodeCol]
+        const endNode = [this.state.endNodeRow, this.state.endNodeCol]
+        let searchPath = this.depthFirstSearchHelper(this.state.grid, [startNode[0], startNode[1]], []);
 
         let lastIndex = 0
         for (let i = 0; i < searchPath.length; i++) {
@@ -85,7 +79,7 @@ export default class Dashboard extends Component {
             const currRow = currNode[0];
             const currCol = currNode[1];
 
-            if (currRow === FINISH_NODE_ROW && currCol === FINISH_NODE_COL) {
+            if (currRow === endNode[0] && currCol === endNode[1]) {
                 lastIndex = i;
                 break;
             }
@@ -94,7 +88,7 @@ export default class Dashboard extends Component {
     }
 
     depthFirstSearchHelper(grid, currNode, searchPath) {
-        if (currNode[0] === FINISH_NODE_ROW && currNode[1] === FINISH_NODE_COL) {
+        if (currNode[0] === this.state.endNodeRow && currNode[1] === this.state.endNodeCol) {
             searchPath.push(currNode);
         }
         else {
@@ -149,25 +143,28 @@ export default class Dashboard extends Component {
                 }
 
                 document.getElementById(`node-${currRow}-${currCol}`).className = 'node visited-node';
-            }, i * 5)
+            }, i * 10)
         }
     }
 
     initiateEmptyGrid() {
         const grid = []
-        for (let rowIndex = 0; rowIndex < 20; rowIndex++) {
+        const startNode = [this.state.startNodeRow, this.state.startNodeCol];
+        const endNode = [this.state.endNodeRow, this.state.endNodeCol];
+
+        for (let rowIndex = 0; rowIndex < 30; rowIndex++) {
             const currRow = []
-            for (let colIndex = 0; colIndex < 50; colIndex++) {
+            for (let colIndex = 0; colIndex < 30; colIndex++) {
                 const currNode = {
-                    isStart: rowIndex === START_NODE_ROW & colIndex === START_NODE_COL,
-                    isEnd: rowIndex === FINISH_NODE_ROW & colIndex === FINISH_NODE_COL,
+                    isStart: false,
+                    isEnd: false,
                     visited: false,
                     isWall: false,
                     row: rowIndex,
                     col: colIndex
                 }
 
-                if (document.getElementById(`node-${rowIndex}-${colIndex}`) !== null && !this.isStartOrEndLocation(rowIndex, colIndex)) {
+                if (document.getElementById(`node-${rowIndex}-${colIndex}`) !== null) {
                     document.getElementById(`node-${rowIndex}-${colIndex}`).className = 'node';
                 }
 
@@ -176,24 +173,41 @@ export default class Dashboard extends Component {
             grid.push(currRow)
         }
 
-        this.setState({ grid: grid, isSolved: false });
+        this.setState({ grid: grid, isSolved: false, startNodeRow: null, startNodeCol: null, endNodeRow: null, endNodeCol: null });
     }
 
     handleMouseDown = (row, col) => {
+        const isStartNodeSet = this.state.startNodeRow === null ? false : true;
+        const isEndNodeSet = this.state.endNodeRow === null ? false : true;
+
         if (this.state.isSolved === false && !this.isStartOrEndNode(row, col)) {
             const newGrid = [...this.state.grid];
-            newGrid[row][col].isWall = !newGrid[row][col].isWall;
-            document.getElementById(`node-${row}-${col}`).className = newGrid[row][col].isWall ? 'node wall-node' : document.getElementById(`node-${row}-${col}`).className;
-            this.setState({ grid: newGrid, isMouseClicked: !this.state.isMouseClicked });
+
+            if (!isStartNodeSet) {
+                newGrid[row][col].isStart = true;
+                document.getElementById(`node-${row}-${col}`).className = 'node start-node';
+                this.setState({ grid: newGrid, isMouseClicked: !this.state.isMouseClicked, startNodeRow: row, startNodeCol: col });
+            }
+            else if (!isEndNodeSet) {
+                newGrid[row][col].isEnd = true;
+                document.getElementById(`node-${row}-${col}`).className = 'node end-node';
+                this.setState({ grid: newGrid, isMouseClicked: !this.state.isMouseClicked, endNodeRow: row, endNodeCol: col });
+            }
+            else {
+                newGrid[row][col].isWall = !newGrid[row][col].isWall;
+                document.getElementById(`node-${row}-${col}`).className = newGrid[row][col].isWall ? 'node wall-node' : document.getElementById(`node-${row}-${col}`).className;
+                this.setState({ grid: newGrid, isMouseClicked: !this.state.isMouseClicked });
+            }
         }
     }
 
     handleMouseEnter = (row, col) => {
-        if (this.state.isMouseClicked && !this.isStartOrEndNode(row, col)) {
+        const startAndEndNodesHaveBeenSelected = this.state.startNodeRow != null && this.state.endNodeRow != null;
+        if (this.state.isMouseClicked && startAndEndNodesHaveBeenSelected && !this.isStartOrEndNode(row, col)) {
             const newGrid = this.state.grid.slice();
             newGrid[row][col].isWall = true;
-            this.setState({ grid: newGrid });
             document.getElementById(`node-${row}-${col}`).className = 'node wall-node';
+            this.setState({ grid: newGrid });
         }
     }
 
@@ -208,15 +222,17 @@ export default class Dashboard extends Component {
     }
 
     render() {
-        return (
-            <>
-                <div className='navbar-container'>
-                    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-                        <a className="navbar-brand" href="#">Search Visualization</a>
-                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent1" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                            <span className="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent1">
+        const isMobile = window.innerWidth <= 500;
+
+        if (isMobile) {
+            return null;
+        }
+        else {
+            return (
+                <>
+                    <div className='navbar-container'>
+                        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+                            <a className="navbar-brand" href="#">Search Visualization</a>
                             <div className="navbar-nav">
                                 <DropdownButton
                                     title={this.state.selectedSearchAlgorithm}
@@ -228,45 +244,45 @@ export default class Dashboard extends Component {
                                 <button type="button" className="btn btn-success" onClick={this.handleAnimation.bind(this)}>Animate</button>
                                 <button type="button" className="btn btn-danger" onClick={this.initiateEmptyGrid.bind(this)}>Reset</button>
                             </div>
-                        </div>
-                    </nav>
-                </div>
-
-                {this.state.userAnimatesBeforeAlgorithmSelectionError &&
-                    <div className="alert-container">
-                        <div class="alert alert-danger" role="alert">
-                            You need to select a search algorithm first!
-                        </div>
+                        </nav>
                     </div>
-                }
 
-                <div className='grid'>
-                    {this.state.grid.map((row, rowIndex) => {
-                        return (
-                            <div className='gridRow' key={rowIndex}>
-                                {row.map((node, nodeIndex) => {
-                                    const { isStart, isEnd, visited, isWall, row, col } = node;
-                                    return (
-                                        <Node
-                                            className='gridCol'
-                                            key={rowIndex + ' ' + nodeIndex}
-                                            isStart={isStart}
-                                            isEnd={isEnd}
-                                            visited={visited}
-                                            isWall={isWall}
-                                            row={row}
-                                            col={col}
-                                            handleMouseDown={(row, col) => this.handleMouseDown(row, col)}
-                                            handleMouseEnter={(row, col) => this.handleMouseEnter(row, col)}
-                                            handleMouseUp={() => this.handleMouseUp()}
-                                        />
-                                    )
-                                })}
+                    {this.state.userAnimatesBeforeAlgorithmSelectionError &&
+                        <div className="alert-container">
+                            <div class="alert alert-danger" role="alert">
+                                You need to select a search algorithm first!
                             </div>
-                        )
-                    })}
-                </div>
-            </>
-        )
+                        </div>
+                    }
+
+                    <div className='grid'>
+                        {this.state.grid.map((row, rowIndex) => {
+                            return (
+                                <div className='gridRow' key={rowIndex}>
+                                    {row.map((node, nodeIndex) => {
+                                        const { isStart, isEnd, visited, isWall, row, col } = node;
+                                        return (
+                                            <Node
+                                                className='gridCol'
+                                                key={rowIndex + ' ' + nodeIndex}
+                                                isStart={isStart}
+                                                isEnd={isEnd}
+                                                visited={visited}
+                                                isWall={isWall}
+                                                row={row}
+                                                col={col}
+                                                handleMouseDown={(row, col) => this.handleMouseDown(row, col)}
+                                                handleMouseEnter={(row, col) => this.handleMouseEnter(row, col)}
+                                                handleMouseUp={() => this.handleMouseUp()}
+                                            />
+                                        )
+                                    })}
+                                </div>
+                            )
+                        })}
+                    </div>
+                </>
+            )
+        }
     }
 }
