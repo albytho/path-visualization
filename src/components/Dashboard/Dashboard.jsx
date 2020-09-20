@@ -16,7 +16,7 @@ export default class Dashboard extends Component {
             startNodeRow: null,
             startNodeCol: null,
             endNodeRow: null,
-            endNodeCol: null
+            endNodeCol: null,
         }
     }
 
@@ -32,6 +32,32 @@ export default class Dashboard extends Component {
         return (row === this.state.startNodeRow && col === this.state.startNodeCol) || (row === this.state.endNodeRow && col === this.state.endNodeCol);
     }
 
+    initiateEmptyGrid() {
+        let grid = []
+        for (let rowIndex = 0; rowIndex < 30; rowIndex++) {
+            const currRow = []
+            for (let colIndex = 0; colIndex < 30; colIndex++) {
+                const currNode = {
+                    isStart: false,
+                    isEnd: false,
+                    visited: false,
+                    isWall: false,
+                    row: rowIndex,
+                    col: colIndex,
+                    mostRecentParentNode: null
+                }
+
+                if (document.getElementById(`node-${rowIndex}-${colIndex}`) !== null) {
+                    document.getElementById(`node-${rowIndex}-${colIndex}`).className = 'node';
+                }
+
+                currRow.push(currNode)
+            }
+            grid.push(currRow)
+        }
+
+        this.setState({ grid: grid, isSolved: false, startNodeRow: null, startNodeCol: null, endNodeRow: null, endNodeCol: null });
+    }
 
     breadthFirstSearch() {
         const queue = [];
@@ -70,49 +96,71 @@ export default class Dashboard extends Component {
 
     depthFirstSearch() {
         const startNode = [this.state.startNodeRow, this.state.startNodeCol]
-        const endNode = [this.state.endNodeRow, this.state.endNodeCol]
-        let searchPath = this.depthFirstSearchHelper(this.state.grid, [startNode[0], startNode[1]], []);
+        const grid = [...this.state.grid]
+        const searchPath = []
 
-        let lastIndex = 0
-        for (let i = 0; i < searchPath.length; i++) {
-            const currNode = searchPath[i];
+        let stack = [];
+        stack.push(startNode);
+        while (stack.length > 0) {
+            const currNode = stack.pop();
             const currRow = currNode[0];
             const currCol = currNode[1];
 
-            if (currRow === endNode[0] && currCol === endNode[1]) {
-                lastIndex = i;
-                break;
+            if (grid[currRow][currCol].visited === false) {
+                grid[currRow][currCol].visited = true;
+                searchPath.push(currNode);
+
+                if (currRow === this.state.endNodeRow && currCol === this.state.endNodeCol) {
+                    this.setState({ grid: grid });
+                    console.log(searchPath);
+                    return searchPath;
+                }
+
+                const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+                directions.forEach((direction) => {
+                    const newRow = currRow + direction[0];
+                    const newCol = currCol + direction[1];
+                    if (this.isValid(grid, newRow, newCol)) {
+                        stack.push([newRow, newCol]);
+                    }
+                });
             }
         }
-        return searchPath.slice(0, lastIndex + 1);
+        this.setState({ grid: grid });
+        console.log(searchPath);
+        return searchPath;
     }
 
-    depthFirstSearchHelper(grid, currNode, searchPath) {
+    depthFirstSearchHelper(grid, parentNode, currNode, searchPath, found) {
         if (currNode[0] === this.state.endNodeRow && currNode[1] === this.state.endNodeCol) {
             searchPath.push(currNode);
+            found = true;
         }
         else {
             const currRow = currNode[0];
             const currCol = currNode[1];
 
+            if (parentNode !== null) grid[currRow][currCol].mostRecentParentNode = [parentNode[0], parentNode[1]];
             grid[currRow][currCol].visited = true;
             searchPath.push(currNode);
 
             const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-            directions.forEach((direction) => {
-                const newRow = currRow + direction[0];
-                const newCol = currCol + direction[1];
+            for (let index = 0; index < directions.length; index++) {
+                const newRow = currRow + directions[index][0];
+                const newCol = currCol + directions[index][1];
 
-                if (this.isValid(grid, newRow, newCol)) {
-                    this.depthFirstSearchHelper(grid, [newRow, newCol], searchPath);
+                if (this.isValid(grid, newRow, newCol) && found === false) {
+                    this.depthFirstSearchHelper(grid, currNode, [newRow, newCol], searchPath, found);
                 }
-            });
+            }
 
+            this.setState({ grid: grid });
             return searchPath;
         }
     }
 
     handleAnimation() {
+        console.log(this.state.grid);
         let searchPath = null;
         switch (this.state.selectedSearchAlgorithm) {
             case 'Breadth First Search':
@@ -145,35 +193,13 @@ export default class Dashboard extends Component {
                 document.getElementById(`node-${currRow}-${currCol}`).className = 'node visited-node';
             }, i * 10)
         }
+
+        this.getNodesInPathOrder(this.state.grid[this.state.endNodeRow][this.state.endNodeCol]);
     }
 
-    initiateEmptyGrid() {
-        const grid = []
-        const startNode = [this.state.startNodeRow, this.state.startNodeCol];
-        const endNode = [this.state.endNodeRow, this.state.endNodeCol];
-
-        for (let rowIndex = 0; rowIndex < 30; rowIndex++) {
-            const currRow = []
-            for (let colIndex = 0; colIndex < 30; colIndex++) {
-                const currNode = {
-                    isStart: false,
-                    isEnd: false,
-                    visited: false,
-                    isWall: false,
-                    row: rowIndex,
-                    col: colIndex
-                }
-
-                if (document.getElementById(`node-${rowIndex}-${colIndex}`) !== null) {
-                    document.getElementById(`node-${rowIndex}-${colIndex}`).className = 'node';
-                }
-
-                currRow.push(currNode)
-            }
-            grid.push(currRow)
-        }
-
-        this.setState({ grid: grid, isSolved: false, startNodeRow: null, startNodeCol: null, endNodeRow: null, endNodeCol: null });
+    getNodesInPathOrder(endNode) {
+        console.log(endNode);
+        return;
     }
 
     handleMouseDown = (row, col) => {
@@ -260,15 +286,11 @@ export default class Dashboard extends Component {
                             return (
                                 <div className='gridRow' key={rowIndex}>
                                     {row.map((node, nodeIndex) => {
-                                        const { isStart, isEnd, visited, isWall, row, col } = node;
+                                        const { row, col } = node;
                                         return (
                                             <Node
                                                 className='gridCol'
                                                 key={rowIndex + ' ' + nodeIndex}
-                                                isStart={isStart}
-                                                isEnd={isEnd}
-                                                visited={visited}
-                                                isWall={isWall}
                                                 row={row}
                                                 col={col}
                                                 handleMouseDown={(row, col) => this.handleMouseDown(row, col)}
