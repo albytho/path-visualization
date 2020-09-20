@@ -16,7 +16,8 @@ export default class Dashboard extends Component {
             grid: [],
             isMouseClicked: false,
             isSolved: false,
-            selectedSearchAlgorithm: 'Select a Search Algorithm'
+            selectedSearchAlgorithm: 'Select a Search Algorithm',
+            userAnimatesBeforeAlgorithmSelectionError: false
         }
     }
 
@@ -125,6 +126,14 @@ export default class Dashboard extends Component {
                 break;
             case 'Depth First Search':
                 searchPath = this.depthFirstSearch();
+                break;
+            default:
+                this.setState({ userAnimatesBeforeAlgorithmSelectionError: true }, () => {
+                    setTimeout(() => {
+                        this.setState({ userAnimatesBeforeAlgorithmSelectionError: false })
+                    }, 5000);
+                });
+                return;
         };
         this.animatePath(searchPath);
     }
@@ -195,7 +204,6 @@ export default class Dashboard extends Component {
     }
 
     handleSearchAlgorithmSelection = (e) => {
-        console.log(e);
         this.setState({ selectedSearchAlgorithm: e });
     }
 
@@ -205,10 +213,10 @@ export default class Dashboard extends Component {
                 <div className='navbar-container'>
                     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                         <a className="navbar-brand" href="#">Search Visualization</a>
-                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent1" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                             <span className="navbar-toggler-icon"></span>
                         </button>
-                        <div>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent1">
                             <div className="navbar-nav">
                                 <DropdownButton
                                     title={this.state.selectedSearchAlgorithm}
@@ -223,6 +231,14 @@ export default class Dashboard extends Component {
                         </div>
                     </nav>
                 </div>
+
+                {this.state.userAnimatesBeforeAlgorithmSelectionError &&
+                    <div className="alert-container">
+                        <div class="alert alert-danger" role="alert">
+                            You need to select a search algorithm first!
+                        </div>
+                    </div>
+                }
 
                 <div className='grid'>
                     {this.state.grid.map((row, rowIndex) => {
