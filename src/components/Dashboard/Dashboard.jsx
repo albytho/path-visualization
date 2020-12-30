@@ -112,55 +112,25 @@ export default class Dashboard extends Component {
 
                 if (currRow === this.state.endNodeRow && currCol === this.state.endNodeCol) {
                     this.setState({ grid: grid });
-                    console.log(searchPath);
                     return searchPath;
                 }
 
-                const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
                 directions.forEach((direction) => {
                     const newRow = currRow + direction[0];
                     const newCol = currCol + direction[1];
                     if (this.isValid(grid, newRow, newCol)) {
+                        grid[newRow][newCol].mostRecentParentNode = [currRow, currCol];
                         stack.push([newRow, newCol]);
                     }
                 });
             }
         }
         this.setState({ grid: grid });
-        console.log(searchPath);
         return searchPath;
     }
 
-    depthFirstSearchHelper(grid, parentNode, currNode, searchPath, found) {
-        if (currNode[0] === this.state.endNodeRow && currNode[1] === this.state.endNodeCol) {
-            searchPath.push(currNode);
-            found = true;
-        }
-        else {
-            const currRow = currNode[0];
-            const currCol = currNode[1];
-
-            if (parentNode !== null) grid[currRow][currCol].mostRecentParentNode = [parentNode[0], parentNode[1]];
-            grid[currRow][currCol].visited = true;
-            searchPath.push(currNode);
-
-            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-            for (let index = 0; index < directions.length; index++) {
-                const newRow = currRow + directions[index][0];
-                const newCol = currCol + directions[index][1];
-
-                if (this.isValid(grid, newRow, newCol) && found === false) {
-                    this.depthFirstSearchHelper(grid, currNode, [newRow, newCol], searchPath, found);
-                }
-            }
-
-            this.setState({ grid: grid });
-            return searchPath;
-        }
-    }
-
     handleAnimation() {
-        console.log(this.state.grid);
         let searchPath = null;
         switch (this.state.selectedSearchAlgorithm) {
             case 'Breadth First Search':
@@ -181,25 +151,31 @@ export default class Dashboard extends Component {
     }
 
     animatePath(searchPath) {
+        let nextStartTime = null;
         for (let i = 0; i < searchPath.length; i++) {
             const currRow = searchPath[i][0];
             const currCol = searchPath[i][1];
             setTimeout(() => {
-                if (this.isStartOrEndNode(currRow, currCol)) {
-                    this.state.isSolved = true;
-                    return;
+                if (!this.isStartOrEndNode(currRow, currCol)) {
+                    document.getElementById(`node-${currRow}-${currCol}`).className = 'node visited-node';
                 }
-
-                document.getElementById(`node-${currRow}-${currCol}`).className = 'node visited-node';
             }, i * 10)
+            nextStartTime = i * 10;
         }
 
-        this.getNodesInPathOrder(this.state.grid[this.state.endNodeRow][this.state.endNodeCol]);
+        this.setState({ isSolved: true });
     }
 
     getNodesInPathOrder(endNode) {
-        console.log(endNode);
-        return;
+        let count = 1
+        let parentNodeLocation = endNode.mostRecentParentNode;
+        while (parentNodeLocation !== null) {
+            document.getElementById(`node-${parentNodeLocation[0]}-${parentNodeLocation[1]}`).className = 'node path-node';
+            parentNodeLocation = this.state.grid[parentNodeLocation[0]][parentNodeLocation[1]].mostRecentParentNode;
+            if (parentNodeLocation === null || parentNodeLocation[0] === this.state.startNodeRow && parentNodeLocation[0] === this.state.startNodeCol) {
+                return;
+            }
+        }
     }
 
     handleMouseDown = (row, col) => {

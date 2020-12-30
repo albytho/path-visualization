@@ -14,6 +14,10 @@
     background-color: rgb(64, 169, 230)
 }
 
+.path-node {
+    background-color: rgb(236, 35, 176)
+}
+
 .start-node {
     background-color: rgb(47, 201, 142);
 }
