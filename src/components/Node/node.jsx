@@ -1,7 +1,7 @@
 import React from 'react'
-import './node.css';
+import './Node.css';
 
-const node = ({ row, col, handleMouseDown, handleMouseEnter, handleMouseUp }) => {
+const Node = ({ row, col, handleMouseDown, handleMouseEnter, handleMouseUp }) => {
     return (
         <div
             id={`node-${row}-${col}`}
@@ -20,4 +20,4 @@ const isEqual = (prevProps, nextProps) => {
     return true;
 }
 
-export default React.memo(node, isEqual);
+export default React.memo(Node, isEqual);
