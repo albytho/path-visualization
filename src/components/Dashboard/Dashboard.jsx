@@ -33,10 +33,11 @@ export default class Dashboard extends Component {
     }
 
     initiateEmptyGrid() {
+        console.log(window.outerHeight, window.outerWidth)
         let grid = []
-        for (let rowIndex = 0; rowIndex < 30; rowIndex++) {
+        for (let rowIndex = 0; rowIndex < window.outerHeight / 50; rowIndex++) {
             const currRow = []
-            for (let colIndex = 0; colIndex < 30; colIndex++) {
+            for (let colIndex = 0; colIndex < window.outerWidth / 80; colIndex++) {
                 const currNode = {
                     isStart: false,
                     isEnd: false,
@@ -235,17 +236,6 @@ export default class Dashboard extends Component {
                     <div className='navbar-container'>
                         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                             <a className="navbar-brand" href="#">Search Visualization</a>
-                            <div className="navbar-nav">
-                                <DropdownButton
-                                    title={this.state.selectedSearchAlgorithm}
-                                    onSelect={this.handleSearchAlgorithmSelection.bind(this)}
-                                >
-                                    <Dropdown.Item eventKey="Breadth First Search">Breadth First Search</Dropdown.Item>
-                                    <Dropdown.Item eventKey="Depth First Search">Depth First Search</Dropdown.Item>
-                                </DropdownButton>
-                                <button type="button" className="btn btn-success" onClick={this.handleAnimation.bind(this)}>Animate</button>
-                                <button type="button" className="btn btn-danger" onClick={this.initiateEmptyGrid.bind(this)}>Reset</button>
-                            </div>
                         </nav>
                     </div>
 
@@ -256,6 +246,22 @@ export default class Dashboard extends Component {
                             </div>
                         </div>
                     }
+
+                    <div className='container'>
+                        <div className='row justify-content-center'>
+                            <DropdownButton
+                                title={this.state.selectedSearchAlgorithm}
+                                onSelect={this.handleSearchAlgorithmSelection.bind(this)}
+                            >
+                                <Dropdown.Item eventKey="Breadth First Search">Breadth First Search</Dropdown.Item>
+                                <Dropdown.Item eventKey="Depth First Search">Depth First Search</Dropdown.Item>
+                            </DropdownButton>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <button type="button" className="btn btn-success" onClick={this.handleAnimation.bind(this)}>Animate</button>
+                            <button type="button" className="btn btn-danger" onClick={this.initiateEmptyGrid.bind(this)}>Reset</button>
+                        </div>
+                    </div>
 
                     <div className='grid'>
                         {this.state.grid.map((row, rowIndex) => {

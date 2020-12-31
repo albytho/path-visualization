@@ -37,3 +37,7 @@ button {
     align-items: center;
     margin-top: 5vh;
 }
+
+.container{
+    width: 100%;
+}
