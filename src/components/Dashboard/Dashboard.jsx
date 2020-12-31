@@ -20,6 +20,7 @@ export default class Dashboard extends Component {
         }
     }
 
+    //hello
     componentDidMount() {
         this.initiateEmptyGrid();
     }
