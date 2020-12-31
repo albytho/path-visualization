@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './Dashboard.css';
-import Node from '../Node/Node';
+import Node from '../Node/Node.jsx';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown'
 
